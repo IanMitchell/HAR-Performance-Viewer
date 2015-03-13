@@ -1,0 +1,75 @@
+/* TODO: Make Responsive */
+
+* {
+  padding: 0;
+  margin: 0;
+}
+
+html {
+
+}
+
+body {
+  font-family: 'Helvetica';
+}
+
+.wrapper {
+  width: 980px;
+  margin: auto;
+}
+
+header {
+  background: cornflowerblue;
+  overflow: auto;
+  margin-bottom: 15px;
+}
+
+h1 {
+  float: left;
+  color: white;
+  padding: 15px 0px;
+  font-weight: 300;
+}
+
+nav {
+  float: right;
+  margin-top: 20px;
+}
+
+ul {
+  list-style: none;
+}
+
+ul li {
+  float: left;
+  margin: 0px 15px;
+}
+
+ul li a {
+  display: block;
+  padding: 5px;
+  color: white;
+  text-decoration: none;
+}
+
+.selected {
+  border-bottom: 1px solid white;
+}
+
+#main {
+  clear: both;
+}
+
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}

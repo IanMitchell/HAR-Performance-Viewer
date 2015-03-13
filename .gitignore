@@ -1,0 +1,3 @@
+config/domains.json
+har/*.json
+node_modules/*
