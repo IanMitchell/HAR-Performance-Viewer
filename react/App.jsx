@@ -14,6 +14,7 @@ var App = React.createClass({
           <meta charSet="UTF-8" />
           <title>HAR Performance Viewer</title>
           <link rel="stylesheet" href="/stylesheets/style.css" />
+          <link rel="stylesheet" href="/stylesheets/nv.d3.css" />
         </head>
         <body>
           <header id="navbar">
@@ -39,9 +40,10 @@ var App = React.createClass({
 
           <script src="/scripts/react-0.12.2.min.js"></script>
           <script src="/socket.io/socket.io.js"></script>
-          <script src="/scripts/socket.js"></script>
           <script src="/scripts/d3.min.js"></script>
+          <script src="/scripts/nv.d3.min.js"></script>
           <script src="/scripts/graph.js"></script>
+          <script src="/scripts/socket.js"></script>
         </body>
       </html>
     );

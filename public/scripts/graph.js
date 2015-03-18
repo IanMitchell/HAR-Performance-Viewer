@@ -15,147 +15,108 @@ function getHeight() {
   return window.innerHeight - navHeight;
 }
 
+function formatData(data) {
+  console.log("Beginning to format data...");
+
+  var parseDate = d3.time.format("%m-%d-%Y").parse;
+  var formatted = [];
+
+  var values = [];
+
+  var keyColors = [
+    { key: 'Internal CSS',    color: '#2ECC40' },
+    { key: 'Internal HTML',   color: '#0074D9' },
+    { key: 'Internal Image',  color: '#FF4136' },
+    { key: 'Internal Script', color: '#B10DC9' },
+    { key: 'Internal Other',  color: '#FFDC00' },
+    { key: 'Internal Total',  color: '#111111' },
+
+    { key: 'External CSS',    color: '#3D9970' },
+    { key: 'External HTML',   color: '#7FDBFF' },
+    { key: 'External Image',  color: '#85144b' },
+    { key: 'External Script', color: '#F012BE' },
+    { key: 'External Other',  color: '#FF851B' },
+    { key: 'External Total',  color: '#AAAAAA' }
+  ];
+
+  for (var i = 0; i < keyColors.length; i++) {
+    if (values[i] === undefined) {
+      values[i] = [];
+    }
+
+    for (var j = 0; j < data['homepage'].length; j++) {
+      var location = keyColors[i].key.split(' ')[0].toLowerCase();
+      var type = keyColors[i].key.split(' ')[1].toLowerCase();
+
+      values[i].push({
+        x: j, // parseDate(data['homepage'][j]['date']),
+        y: data['homepage'][j][location][type]
+      });
+    }
+  }
+
+  for (var k = 0; k < keyColors.length; k++) {
+    formatted.push({
+      values: values[k],
+      key: keyColors[k].key,
+      color: keyColors[k].color
+    });
+  }
+
+  console.log("Formatted Data:");
+  console.log(formatted);
+  return formatted;
+}
+
 function paintGraph(data, label) {
-  console.log('Graph receiving data:');
-  console.log(data);
-  console.log('Clearing SVG');
-  d3.select('#visualization').selectAll("*").remove();
-
-  console.log('Beginning paint');
-
   var margin = {
-    top: 40,
+    top: 80,
     right: 80,
-    bottom: 40,
+    bottom: 80,
     left: 80
   };
 
   var width = getWidth() - margin.left - margin.right,
       height = getHeight() - margin.top - margin.bottom;
 
-  var parseDate = d3.time.format("%m-%d-%Y").parse;
+  console.log('Calculated margin, width, and height values');
 
-  var x = d3.time.scale()
-      .range([0, width]);
+  d3.select('#chart').selectAll("*").remove();
 
-  var y = d3.scale.linear()
-      .range([height, 0]);
+  console.log("Reset SVG.");
+  console.log("Formatting NV Chart...");
 
-  var color = d3.scale.category10();
+  nv.addGraph(function() {
+    var chart = nv.models.lineChart()
+      .margin(margin)
+      .useInteractiveGuideline(true)
+      .showLegend(true)
+      .showYAxis(true)
+      .showXAxis(true);
 
-  var xAxis = d3.svg.axis()
-      .scale(x)
-      .orient("bottom")
-      .ticks(data['homepage'].length - 1)
-      .tickSubdivide(0)
-      .tickFormat(d3.time.format("%m-%d"));;
+    console.log("Created Chart obj");
 
-  var yAxis = d3.svg.axis()
-      .scale(y)
-      .orient("left");
+    chart.xAxis
+      .axisLabel('Date')
+      .tickFormat(function(d) {
+        return d3.time.format('%m/%d')(new Date(data['homepage'][d]['date']))
+      });
 
-  // TODO
-  var line = d3.svg.line()
-      .interpolate("linear")
-      .x(function(d) { return x(d.date); })
-      .y(function(d) { return y(d.total); });
+    console.log("Created xAxis");
 
-  var svg = d3.select("#visualization")
+    chart.yAxis
+      .axisLabel(label);
+
+    console.log("Created yAxis");
+
+    d3.select('#chart')
+      .datum(formatData(data))
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+      .call(chart);
 
-  console.log('Initial setup complete...');
+    console.log("Created D3 Object");
 
-  color.domain(d3.keys(data['homepage'][0]).filter(function(key) {
-    return key !== "date";
-  }));
-
-  console.log('Colors set...');
-  console.log(color.domain());
-
-  data['homepage'].forEach(function(d) {
-    d.date = parseDate(d.date);
+    return chart;
   });
-
-  console.log('Dates set...');
-  console.log(data);
-
-  var requests = color.domain().map(function(name) {
-    return {
-      name: name,
-      values: data['homepage'].map(function(d) {
-        return {
-          date: d.date,
-          total: d[name]['total'],
-        };
-      })
-    };
-  });
-
-  console.log('Requests set...');
-  console.log(requests);
-
-  x.domain(d3.extent(data['homepage'], function(d) {
-    return d.date;
-  }));
-
-  console.log('X Axis set...');
-
-  y.domain([
-    d3.min(requests, function(c) {
-      return d3.min(c.values, function(v) {
-        return 0;
-      });
-    }),
-    d3.max(requests, function(c) {
-      return d3.max(c.values, function(v) {
-        return v.total;
-      });
-    })
-  ]);
-
-  console.log('Y Axis set... Label: ' + label);
-
-  svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
-
-  svg.append("g")
-      .attr("class", "y axis")
-      .call(yAxis)
-      .append("text")
-      .attr("y", -30)
-      .attr("dy", "0.35em")
-      .style("text-anchor", "middle")
-      .text(label);
-
-  var request = svg.selectAll(".request")
-      .data(requests)
-      .enter().append("g")
-      .attr("class", "request");
-
-  request.append("path")
-      .attr("class", "line")
-      .attr("d", function(d) { return line(d.values); })
-      .style("stroke", function(d) { return color(d.name); });
-
-  request.append("text")
-      .datum(function(d) {
-        return {
-          name: d.name,
-          value: d.values[d.values.length - 1]
-        };
-      })
-      .attr("transform", function(d) {
-        return "translate(" + x(d.value.date) + "," + y(d.value.total) + ")";
-      })
-      .attr("x", 3)
-      .attr("dy", ".35em")
-      .text(function(d) { return d.name; });
-
-
-  console.log('Fin');
 }

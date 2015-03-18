@@ -9,7 +9,7 @@ var Graph = React.createClass({
   render: function() {
     return (
       <div id="graph">
-        <svg id="visualization" width="1000" height="500"></svg>
+        <svg id="chart" width="1000" height="500"></svg>
       </div>
     );
   }
