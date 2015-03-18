@@ -15,6 +15,23 @@ function getHeight() {
   return window.innerHeight - navHeight;
 }
 
+function getMaxPointY(data) {
+  console.log("Calculating max Y point");
+  var max = 0;
+
+  for (var i = 0; i < data.length; i++) {
+    for (var j = 0; j < data[i].values.length; j++) {
+      if (data[i].values[j].y > max) {
+        max = data[i].values[j].y;
+      }
+    }
+  }
+
+  console.log("Max: " + max);
+
+  return max;
+}
+
 function formatData(data) {
   console.log("Beginning to format data...");
 
@@ -76,6 +93,8 @@ function paintGraph(data, label) {
     left: 80
   };
 
+  var formattedData = formatData(data);
+
   var width = getWidth() - margin.left - margin.right,
       height = getHeight() - margin.top - margin.bottom;
 
@@ -91,6 +110,7 @@ function paintGraph(data, label) {
       .margin(margin)
       .useInteractiveGuideline(true)
       .showLegend(true)
+      .forceY([0, Math.round(getMaxPointY(formattedData) * 1.1)])
       .showYAxis(true)
       .showXAxis(true);
 
@@ -110,7 +130,7 @@ function paintGraph(data, label) {
     console.log("Created yAxis");
 
     d3.select('#chart')
-      .datum(formatData(data))
+      .datum(formattedData)
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .call(chart);
